@@ -1,0 +1,19 @@
+(
+    subreddit_configs: [ // this is an array, so feel free to add as many subreddit configs as you want
+        (
+            subreddit: "<subreddit name, (e.g. forhire)>",
+            search_query: (
+                before: "<fullname of starting post, (e.g. t3_bosacp)>",
+                count: 0, // >= 0
+                limit: 25, // defaults to 25, maximum is 100
+                q: "", // maximum 512 characters
+                restrict_sr: true,
+                sort: "<relevance|hot|top|new|comments>", // choose one
+                t: "<hour|day|week|month|year|all>", // choose one
+            ),
+        ),
+    ],
+    discord_bot_token: "<your discord bot token>",
+    reddit_oauth_id: "<the little string under your Reddit app name>",
+    reddit_oauth_secret: "<your Reddit app secret>",
+)

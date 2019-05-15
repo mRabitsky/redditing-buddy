@@ -1,14 +1,27 @@
-#[macro_use]
-extern crate structopt;
+//! Hiring Buddy is a command-line tool that runs in the background, periodically checking various
+//! Subreddits for new posts and pinging Discord whenever a new post is detected.
+//! ```
+//! USAGE:
+//!     hiring-buddy [OPTIONS]
+//!
+//! FLAGS:
+//!     -h, --help       Prints help information
+//!     -V, --version    Prints version information
+//!
+//! OPTIONS:
+//!     -c, --config <config>        Configuration file [default: config.ron]
+//!     -d, --duration <duration>    Interstitial duration for checking Reddit [default: 600s]
+//! ```
 
-use std::ffi::{OsStr, OsString};
-use std::path::{Path, PathBuf};
+
+#[macro_use] extern crate structopt;
+
+use std::path::PathBuf;
 use std::time::Duration;
 
 use structopt::StructOpt;
 
-use hiring_buddy::parse_duration;
-
+use hiring_buddy::utils::{file_exists, parse_duration};
 
 #[derive(Debug, StructOpt)]
 #[structopt(rename_all = "kebab-case")]
@@ -20,21 +33,6 @@ struct Options {
     /// Interstitial duration for checking Reddit
     #[structopt(short, long, default_value = "600s", parse(try_from_str = "parse_duration"))]
     duration: Duration,
-}
-
-fn file_exists(file: &OsStr) -> Result<(), OsString> {
-    let path = Path::new(&file);
-    if path.exists() {
-        if path.extension().is_none() {
-            Err(OsString::from("Could not read the file extension"))
-        } else if path.extension().unwrap() != "ron" {
-            Err(OsString::from("Config files must be RON files (Rusty Object Notation)"))
-        } else {
-            Ok(())
-        }
-    } else {
-        Err(OsString::from("There is no file at the path entered"))
-    }
 }
 
 fn main() {
