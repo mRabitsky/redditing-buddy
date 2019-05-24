@@ -51,7 +51,7 @@ impl Redditor {
 
     pub fn check(&mut self) -> HashMap<String, Vec<Post>> {
         if self.token.is_expired() {
-            self._update_token().unwrap();
+            self._update_token().expect("Failed to update token before running `check`");
         }
         let mut config = self.config.lock().expect("Arc lock was poisoned in the config");
         let results: HashMap<String, reqwest::Result<reqwest::Response>> = config.subreddit_configs.iter().map(|sub| {
@@ -73,25 +73,27 @@ impl Redditor {
             return HashMap::new();
         }
 
-        let results: HashMap<String, Thing<Listing>> = results.into_iter().map(|(k, v): (String, reqwest::Result<reqwest::Response>)| (k, v.unwrap().json().unwrap())).collect();
+        let results: HashMap<String, Thing<Listing>> = results.into_iter().map(|(k, v): (String, reqwest::Result<reqwest::Response>)| (k, v.unwrap().json().expect("Failed to parse JSON for reqwest response"))).collect();
 
-        results.into_iter().map(|(sub, listing_thing): (String, Thing<Listing>)| {
-            (format!("r/{}", sub), {
-                // first we need to update the subreddit config to be aware of the latest seen post
-                let latest = listing_thing.children.first().unwrap().name.clone();
-                config.subreddit_configs.iter_mut().find(|c| c.subreddit == sub).unwrap().search_query.before = latest;
+        results.into_iter()
+            .filter(|(_, listing_thing)| !listing_thing.children.is_empty())
+            .map(|(sub, listing_thing): (String, Thing<Listing>)| {
+                (format!("r/{}", sub), {
+                    // first we need to update the subreddit config to be aware of the latest seen post
+                    let latest = listing_thing.children.first().expect("For some reason, the children array was empty").name.clone();
+                    config.subreddit_configs.iter_mut().find(|c| c.subreddit == sub).unwrap().search_query.before = latest;
 
-                listing_thing.children.iter().map(|post| {
-                    Post {
-                        title: post.title.clone(),
-                        link: post.url.clone(),
-                        score: post.score,
-                        comments: post.num_comments,
-                        posted: Duration::from_secs((Utc::now().timestamp() as u64) - (post.created_utc as u64))
-                    }
-                }).collect::<Vec<Post>>()
-            })
-        }).collect()
+                    listing_thing.children.iter().map(|post| {
+                        Post {
+                            title: post.title.clone(),
+                            link: post.url.clone(),
+                            score: post.score,
+                            comments: post.num_comments,
+                            posted: Duration::from_secs((Utc::now().timestamp() as u64) - (post.created_utc as u64))
+                        }
+                    }).collect::<Vec<Post>>()
+                })
+            }).collect()
     }
 
     fn _update_token(&mut self) -> reqwest::Result<()> {

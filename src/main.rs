@@ -19,6 +19,7 @@ use std::io;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use chrono::Local;
 use structopt::StructOpt;
 
 use redditing_buddy::config::Config;
@@ -44,6 +45,7 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let mut monitor = Monitor::new(config, options.duration);
     monitor.start()?;
 
+    println!("Server started at {}", Local::now());
     println!("Enter \"stop\" to stop the program.");
     loop { // await console input and break when told to stop
         let mut buf = String::new();
@@ -58,5 +60,6 @@ fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     monitor.stop()?;
 
+    println!("Server stopped at {}", Local::now());
     Ok(())
 }

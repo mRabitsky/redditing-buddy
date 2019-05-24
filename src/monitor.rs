@@ -23,7 +23,7 @@ pub struct Monitor {
     }
     pub fn start(&mut self) -> Result<(), Box<dyn Error>> {
         let mut scheduler = Scheduler::new();
-        let d = DiscordMessenger::new(self.config.lock().unwrap().discord_bot_token.clone())?;
+        let d = DiscordMessenger::new(self.config.lock().expect("Could not get a lock on the config in `start`").discord_bot_token.clone())?;
         let mut r = Redditor::new(Arc::clone(&self.config))?;
 
         scheduler.every((self.interval.as_secs() as u32).seconds()).run(move || {
