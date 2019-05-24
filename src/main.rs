@@ -1,8 +1,8 @@
-//! Hiring Buddy is a command-line tool that runs in the background, periodically checking various
+//! Redditing Buddy is a command-line tool that runs in the background, periodically checking various
 //! Subreddits for new posts and pinging Discord whenever a new post is detected.
-//! ```
+//!
 //! USAGE:
-//!     hiring-buddy [OPTIONS]
+//!     redditing-buddy [FLAGS] [OPTIONS]
 //!
 //! FLAGS:
 //!     -h, --help       Prints help information
@@ -10,18 +10,20 @@
 //!
 //! OPTIONS:
 //!     -c, --config <config>        Configuration file [default: config.ron]
-//!     -d, --duration <duration>    Interstitial duration for checking Reddit [default: 600s]
+//!     -d, --duration <duration>    Interstitial duration for checking Reddit [default: 20s]
 //! ```
-
 
 #[macro_use] extern crate structopt;
 
+use std::io;
 use std::path::PathBuf;
 use std::time::Duration;
 
 use structopt::StructOpt;
 
-use hiring_buddy::utils::{file_exists, parse_duration};
+use redditing_buddy::config::Config;
+use redditing_buddy::Monitor;
+use redditing_buddy::utils::{file_exists, parse_duration};
 
 #[derive(Debug, StructOpt)]
 #[structopt(rename_all = "kebab-case")]
@@ -35,7 +37,26 @@ struct Options {
     duration: Duration,
 }
 
-fn main() {
-    let options = Options::from_args();
-    dbg!(options);
+fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
+    let options: Options = Options::from_args();
+    let config = Config::read(options.config)?;
+
+    let mut monitor = Monitor::new(config, options.duration);
+    monitor.start()?;
+
+    println!("Enter \"stop\" to stop the program.");
+    loop { // await console input and break when told to stop
+        let mut buf = String::new();
+        if let Err(e) = io::stdin().read_line(&mut buf) {
+            eprintln!("Error: {}", e);
+        }
+
+        if buf.trim().to_lowercase() == "stop" { break; }
+        else { println!("Sorry mate, didn't catch that!\nIf you want to stop, enter \"stop\" into the console."); }
+    }
+    println!("Stopping the monitor...");
+
+    monitor.stop()?;
+
+    Ok(())
 }

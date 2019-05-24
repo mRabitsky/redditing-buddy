@@ -1,19 +1,20 @@
 (
     subreddit_configs: [ // this is an array, so feel free to add as many subreddit configs as you want
         (
-            subreddit: "<subreddit name, (e.g. forhire)>",
+            subreddit: "", // subreddit name without the leading prefix, (e.g. forhire)
             search_query: (
-                before: "<fullname of starting post, (e.g. t3_bosacp)>",
+                before: "", // fullname of starting post, (e.g. t3_bosacp)
                 count: 0, // >= 0
                 limit: 25, // defaults to 25, maximum is 100
                 q: "", // maximum 512 characters
-                restrict_sr: true,
-                sort: "<relevance|hot|top|new|comments>", // choose one
-                t: "<hour|day|week|month|year|all>", // choose one
+                restrict_sr: true, // whether or not to restrict your query to just this subreddit. Should always be set to true, (probably).
+                sort: "", // choose one of <relevance|hot|top|new|comments>
+                t: "", // choose one of <hour|day|week|month|year|all>
             ),
         ),
     ],
-    discord_bot_token: "<your discord bot token>",
-    reddit_oauth_id: "<the little string under your Reddit app name>",
-    reddit_oauth_secret: "<your Reddit app secret>",
+    discord_bot_token: "", // your discord bot token
+    reddit_oauth_id: "", // the little string under your Reddit app name
+    reddit_oauth_secret: "", // your Reddit app secret
+    path: "", // path of this file, for saving
 )

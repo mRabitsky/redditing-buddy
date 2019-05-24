@@ -16,13 +16,14 @@ pub struct Config {
     pub discord_bot_token: String,
     pub reddit_oauth_id: String,
     pub reddit_oauth_secret: String,
+    pub path: PathBuf,
 }
 impl Config {
     pub fn read(file_path: PathBuf) -> ron::de::Result<Config> {
         let input = fs::read_to_string(file_path)?;
         ron::de::from_str(input.as_str())
     }
-    pub fn write(&self, file_path: PathBuf) -> std::result::Result<(), Box<Error>> {
+    pub fn write(&self, file_path: &PathBuf) -> std::result::Result<(), Box<Error>> {
         fs::write(file_path, ron::ser::to_string_pretty(self, ron::ser::PrettyConfig { ..PrettyConfig::default() })?.as_bytes())?;
         Ok(())
     }

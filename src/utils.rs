@@ -20,8 +20,8 @@ impl Error for DurationParseError {}
 
 pub fn parse_duration(s: &str) -> Result<Duration, DurationParseError> {
     lazy_static! {
-    static ref DURATION_RE: Regex = Regex::new(r"^(\d+)([nμm]?s)$").unwrap();
-}
+        static ref DURATION_RE: Regex = Regex::new(r"^(\d+)([nμm]?s)$").unwrap();
+    }
     let s = s.trim();
 
     if DURATION_RE.is_match(s) {
